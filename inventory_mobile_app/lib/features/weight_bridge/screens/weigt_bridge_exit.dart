@@ -13,10 +13,10 @@ class WeighBridgeExitPage extends StatefulWidget {
   const WeighBridgeExitPage({super.key});
 
   @override
-  State<WeighBridgeExitPage> createState() => _WeighBridgeExitPageState();
+  State<WeighBridgeExitPage> createState() => _WeighBridgePageState();
 }
 
-class _WeighBridgeExitPageState extends State<WeighBridgeExitPage> {
+class _WeighBridgePageState extends State<WeighBridgeExitPage> {
   int? selectedGateId;
 
   final _formKey = GlobalKey<FormState>();
@@ -59,7 +59,7 @@ class _WeighBridgeExitPageState extends State<WeighBridgeExitPage> {
         leading: BackButton(color: Colors.white),
         backgroundColor: AppColors.primary,
         title: Text(
-          "Weight Bridge Exit",
+          "Weight Bridge ",
           style: TextStyle(
             fontSize: Dimens.title,
             color: Colors.white,

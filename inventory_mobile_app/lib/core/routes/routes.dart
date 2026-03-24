@@ -1,7 +1,13 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:inventory_mobile_app/features/authentication/bloc/auth_bloc.dart';
 import 'package:inventory_mobile_app/features/authentication/screens/login_screen.dart';
-import 'package:inventory_mobile_app/features/gate_entries_exits/screens/gate_entry_exit_screen.dart';
+
+import 'package:inventory_mobile_app/features/gate_operations/gate_entries/screens/gate_entry_screen.dart';
+
+import 'package:inventory_mobile_app/features/gate_operations/screens/gate_operations_screen.dart';
 import 'package:inventory_mobile_app/features/homescreen/pages/homescreen.dart';
+import 'package:inventory_mobile_app/features/loading/screens/loading_screen.dart';
 import 'package:inventory_mobile_app/features/operations/material_issue/screens/material_issue_screen.dart';
 import 'package:inventory_mobile_app/features/operations/material_reciept/screens/material_receipt_screen.dart';
 import 'package:inventory_mobile_app/features/operations/screens/staff_home_screen.dart';
@@ -15,7 +21,9 @@ enum Routes {
   splash,
   login,
   unloadingPage,
-  gateEntryExit,
+  loadingPage,
+  gateOperations,
+  gateEntry,
   materialReceipt,
   materialIssue,
   stockTransfer,
@@ -28,6 +36,7 @@ enum Routes {
   weightBridge,
   weightBridgeExit,
   homeScreen,
+  // updateGateEntry,
 }
 
 GoRouter router = GoRouter(
@@ -44,7 +53,10 @@ GoRouter router = GoRouter(
       path: "/login",
       name: Routes.login.name,
       builder: (context, state) {
-        return LoginScreen();
+        return BlocProvider(
+          create: (context) => AuthBloc(),
+          child: LoginScreen(),
+        );
       },
     ),
     GoRoute(
@@ -55,12 +67,33 @@ GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: "/gate-entry-exit",
-      name: Routes.gateEntryExit.name,
+      path: "/loadingPage",
+      name: Routes.loadingPage.name,
+      builder: (context, state) {
+        return LoadingScreen();
+      },
+    ),
+    GoRoute(
+      path: "/gateOperations",
+      name: Routes.gateOperations.name,
       builder: (context, state) {
         return GateOperationsPage();
       },
     ),
+    GoRoute(
+      path: "/gateEntry",
+      name: Routes.gateEntry.name,
+      builder: (context, state) {
+        return GateEntryScreen();
+      },
+    ),
+    // GoRoute(
+    //   path: "/updateGateEntry",
+    //   name: Routes.updateGateEntry.name,
+    //   builder: (context, state) {
+    //     return UpdateGateEntryScreen();
+    //   },
+    // ),
     GoRoute(
       path: "/weight-Bridge",
       name: Routes.weightBridge.name,
@@ -109,7 +142,7 @@ GoRouter router = GoRouter(
       path: "/homeScreen",
       name: Routes.homeScreen.name,
       builder: (context, state) {
-        return HomePage();
+        return BlocProvider(create: (context) => AuthBloc(), child: HomePage());
       },
     ),
   ],

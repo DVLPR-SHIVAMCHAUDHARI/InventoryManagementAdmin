@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inventory_mobile_app/core/routes/routes.dart';
+import 'package:inventory_mobile_app/core/services/tokenservice.dart';
 
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
@@ -12,8 +13,10 @@ class Splashscreen extends StatefulWidget {
 class _SplashscreenState extends State<Splashscreen> {
   @override
   void initState() {
-    Future.delayed((Duration(milliseconds: 600)), () {
-      router.goNamed(Routes.login.name);
+    Future.delayed(const Duration(seconds: 1), () {
+      TokenServices().accessToken != null
+          ? router.goNamed(Routes.homeScreen.name)
+          : router.goNamed(Routes.login.name);
     });
     super.initState();
   }

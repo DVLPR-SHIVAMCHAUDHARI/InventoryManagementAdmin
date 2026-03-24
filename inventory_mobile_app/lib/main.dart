@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:inventory_mobile_app/core/consts/themedata.dart';
 import 'package:inventory_mobile_app/core/routes/routes.dart';
+import 'package:inventory_mobile_app/core/services/tokenservice.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await TokenServices().load();
+
   runApp(const InventoryManagementMobile());
 }
 

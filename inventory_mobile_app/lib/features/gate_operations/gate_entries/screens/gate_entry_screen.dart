@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:inventory_mobile_app/core/consts/appcolors.dart';
-import 'package:inventory_mobile_app/features/gate_entries_exits/gate_entry/screens/gate_entry_screen.dart'
-    hide Dimens;
-import 'package:inventory_mobile_app/features/gate_entries_exits/gate_exit/screens/gate_exit_screen.dart';
+import 'package:inventory_mobile_app/features/gate_operations/gate_entries/bloc/gate_entry_bloc.dart';
+import 'package:inventory_mobile_app/features/gate_operations/gate_entries/screens/new_gate_entry_screen.dart';
+import 'package:inventory_mobile_app/features/gate_operations/gate_entries/screens/past_entries_screen.dart';
+import 'package:inventory_mobile_app/features/gate_operations/gate_exits/bloc/gate_exit_bloc.dart';
 
-class GateOperationsPage extends StatelessWidget {
-  const GateOperationsPage({super.key});
+import 'package:inventory_mobile_app/features/master/bloc/master_bloc.dart';
+import 'package:inventory_mobile_app/features/master/bloc/master_event.dart';
+
+class GateEntryScreen extends StatelessWidget {
+  const GateEntryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +24,7 @@ class GateOperationsPage extends StatelessWidget {
           backgroundColor: AppColors.primary,
           centerTitle: true,
           title: const Text(
-            'Gate Operations',
+            'Gate Entries',
             style: TextStyle(
               fontSize: 16, // ✅ FIXED (NO .sp)
               fontWeight: FontWeight.w600,
@@ -47,17 +52,37 @@ class GateOperationsPage extends StatelessWidget {
                 ),
                 labelPadding: const EdgeInsets.symmetric(horizontal: 8),
                 tabs: const [
-                  Tab(text: 'Gate IN'),
-                  Tab(text: 'Gate OUT'),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Tab(text: 'Gate IN'),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Tab(text: 'Past Entries'),
+                  ),
                 ],
               ),
             ),
           ),
         ),
 
-        body: TabBarView(
-          physics: NeverScrollableScrollPhysics(),
-          children: [GateEntryPage(), GateExitPage()],
+        body: BlocProvider(
+          create: (context) => GateEntryBloc(),
+          child: TabBarView(
+            physics: NeverScrollableScrollPhysics(),
+            children: [
+              BlocProvider(
+                create: (context) => MasterBloc()..add(FetchParties()),
+                child: NewGateEntryPage(),
+              ),
+
+              BlocProvider(
+                create: (context) => GateExitBloc(),
+
+                child: PastEntriesPage(),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:inventory_mobile_app/core/consts/appcolors.dart';
+import 'package:inventory_mobile_app/core/consts/snack_bar.dart';
 import 'package:inventory_mobile_app/core/routes/routes.dart';
+import 'package:inventory_mobile_app/features/authentication/bloc/auth_bloc.dart';
+import 'package:inventory_mobile_app/features/authentication/bloc/auth_event.dart';
+import 'package:inventory_mobile_app/features/authentication/bloc/auth_state.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -30,6 +35,27 @@ class HomePage extends StatelessWidget {
             color: Colors.white,
           ),
         ),
+        actions: [
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is UnauthenticatedState) {
+                snackbar(
+                  context,
+                  color: Colors.green,
+                  title: "Success",
+                  message: "Logged Out Successfully",
+                );
+                router.goNamed(Routes.login.name);
+              }
+            },
+            child: IconButton(
+              onPressed: () {
+                context.read<AuthBloc>().add(LogoutEvent());
+              },
+              icon: Icon(Icons.logout, color: Colors.white),
+            ),
+          ),
+        ],
       ),
 
       body: Padding(
@@ -45,15 +71,15 @@ class HomePage extends StatelessWidget {
               icon: Icons.login,
               title: 'Gate Operations',
               subtitle: 'Gate IN / OUT',
-              onTap: () => router.pushNamed(Routes.gateEntryExit.name),
+              onTap: () => router.pushNamed(Routes.gateOperations.name),
             ),
-            _homeTile(
-              context,
-              icon: Icons.scale,
-              title: 'Weigh Bridge',
-              subtitle: 'IN / OUT',
-              onTap: () => router.pushNamed(Routes.weightBridge.name),
-            ),
+            // _homeTile(
+            //   context,
+            //   icon: Icons.scale,
+            //   title: 'Weigh Bridge',
+            //   subtitle: 'IN / OUT',
+            //   onTap: () => router.pushNamed(Routes.weightBridge.name),
+            // ),
             _homeTile(
               context,
               icon: Icons.local_shipping,
@@ -69,6 +95,13 @@ class HomePage extends StatelessWidget {
               onTap: () {
                 router.pushNamed(Routes.staffHome.name);
               },
+            ),
+            _homeTile(
+              context,
+              icon: Icons.local_shipping,
+              title: 'Loading',
+              subtitle: 'Finished Goods loading',
+              onTap: () => router.pushNamed(Routes.loadingPage.name),
             ),
             // _homeTile(
             //   context,

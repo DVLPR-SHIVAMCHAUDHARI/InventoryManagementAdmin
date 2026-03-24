@@ -66,7 +66,7 @@ class WeighBridgeOutListPage extends StatelessWidget {
 
               // ✅ Navigate AFTER confirmation
               router.pushNamed(
-                Routes.weightBridgeExit.name,
+                Routes.weightBridge.name,
                 extra: item, // 👈 pass full object if needed
               );
             },

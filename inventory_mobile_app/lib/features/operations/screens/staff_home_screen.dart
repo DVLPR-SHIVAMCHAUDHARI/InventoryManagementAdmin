@@ -35,8 +35,8 @@ class StaffHomePage extends StatelessWidget {
           children: [
             _actionCard(
               context,
-              title: 'Material Receipt',
-              icon: Icons.input,
+              title: 'Material Request',
+              icon: Icons.border_horizontal_rounded,
               onTap: () {
                 router.pushNamed(Routes.materialReceipt.name);
               },
@@ -53,6 +53,22 @@ class StaffHomePage extends StatelessWidget {
               context,
               title: 'Stock Transfer',
               icon: Icons.swap_horiz,
+              onTap: () {
+                router.pushNamed(Routes.stockTransfer.name);
+              },
+            ),
+            _actionCard(
+              context,
+              title: 'Finished Goods request',
+              icon: Icons.request_quote_sharp,
+              onTap: () {
+                router.pushNamed(Routes.stockTransfer.name);
+              },
+            ),
+            _actionCard(
+              context,
+              title: 'Finished Goods Issue',
+              icon: Icons.assignment_add,
               onTap: () {
                 router.pushNamed(Routes.stockTransfer.name);
               },

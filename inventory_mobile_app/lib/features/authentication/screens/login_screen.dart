@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:inventory_mobile_app/core/consts/appcolors.dart';
 import 'package:inventory_mobile_app/core/consts/asset_url.dart';
+import 'package:inventory_mobile_app/core/consts/snack_bar.dart';
 import 'package:inventory_mobile_app/core/routes/routes.dart';
+import 'package:inventory_mobile_app/features/authentication/bloc/auth_bloc.dart';
+import 'package:inventory_mobile_app/features/authentication/bloc/auth_event.dart';
+import 'package:inventory_mobile_app/features/authentication/bloc/auth_state.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -130,6 +135,26 @@ class LoginScreen extends StatelessWidget {
                             ),
 
                             SizedBox(height: 30),
+                            BlocListener<AuthBloc, AuthState>(
+                              listener: (context, state) {
+                                if (state is SignInFailureState) {
+                                  snackbar(
+                                    context,
+                                    color: Colors.red,
+                                    message: state.message,
+                                  );
+                                } else if (state is SignInSuccessState) {
+                                  snackbar(
+                                    context,
+                                    color: Colors.green,
+                                    title: "Success",
+                                    message: "Login Successful",
+                                  );
+                                  router.goNamed(Routes.homeScreen.name);
+                                }
+                              },
+                              child: Container(),
+                            ),
 
                             /// Submit
                             // BlocBuilder<AuthBloc, AuthState>(
@@ -201,17 +226,34 @@ loginbutton({
       ),
       onPressed: () {
         if (formkey.currentState!.validate()) {
-          // Perform login action
-          router.goNamed(Routes.homeScreen.name);
+          context.read<AuthBloc>().add(
+            SignInEvent(
+              emailController.text.trim(),
+              passwordController.text.trim(),
+            ),
+          );
         }
       },
-      child: const Text(
-        "Submit",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 15,
-          color: Colors.white,
-        ),
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          return state is SignInLoadingState
+              ? SizedBox(
+                  height: 16,
+                  width: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  "Submit",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                );
+        },
       ),
     ),
   );

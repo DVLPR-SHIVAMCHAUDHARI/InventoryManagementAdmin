@@ -1,5 +1,4 @@
 import 'package:inventory_mobile_app/core/services/dio_repo.dart';
-import 'package:intl/intl.dart';
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/models/gate_Entry_model.dart';
 
 class GateEntryRepo extends Repository {

@@ -1,6 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/models/gate_Entry_model.dart';
 
-abstract class GateEntryState {}
+abstract class GateEntryState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
 class GateEntryInitial extends GateEntryState {}
 
@@ -9,6 +13,8 @@ class GateEntryLoading extends GateEntryState {}
 class GateEntrySuccess extends GateEntryState {
   final String message;
   GateEntrySuccess(this.message);
+  @override
+  List<Object?> get props => [message];
 }
 
 class GateEntryFailure extends GateEntryState {

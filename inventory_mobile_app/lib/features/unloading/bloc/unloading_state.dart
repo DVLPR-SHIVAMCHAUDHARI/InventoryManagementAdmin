@@ -1,58 +1,77 @@
 import 'package:equatable/equatable.dart';
 
-class UnloadingState extends Equatable {
-  final int? bottleId;
-  final int? capId;
-  final int? labelId;
-  final int? cartonId;
-  final int? monoCartonId;
+abstract class UnloadingState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
 
-  final bool isSubmitting;
-  final bool isSuccess;
-  final String? error;
+/// Initial
+class UnloadingInitial extends UnloadingState {}
 
-  const UnloadingState({
-    this.bottleId,
-    this.capId,
-    this.labelId,
-    this.cartonId,
-    this.monoCartonId,
-    this.isSubmitting = false,
-    this.isSuccess = false,
-    this.error,
-  });
+/// Submit Bottle Entry States
+class BottleEntryLoading extends UnloadingState {}
 
-  UnloadingState copyWith({
-    int? bottleId,
-    int? capId,
-    int? labelId,
-    int? cartonId,
-    int? monoCartonId,
-    bool? isSubmitting,
-    bool? isSuccess,
-    String? error,
-  }) {
-    return UnloadingState(
-      bottleId: bottleId ?? this.bottleId,
-      capId: capId ?? this.capId,
-      labelId: labelId ?? this.labelId,
-      cartonId: cartonId ?? this.cartonId,
-      monoCartonId: monoCartonId ?? this.monoCartonId,
-      isSubmitting: isSubmitting ?? this.isSubmitting,
-      isSuccess: isSuccess ?? this.isSuccess,
-      error: error,
-    );
-  }
+class BottleEntrySuccess extends UnloadingState {
+  final String message;
+  BottleEntrySuccess(this.message);
+  @override
+  List<Object?> get props => [message];
+}
+
+class BottleEntryFailure extends UnloadingState {
+  final String error;
+  BottleEntryFailure(this.error);
+  @override
+  List<Object?> get props => [];
+}
+
+/// ================= CAP =================
+class CapEntryLoading extends UnloadingState {}
+
+class CapEntrySuccess extends UnloadingState {}
+
+class CapEntryFailure extends UnloadingState {
+  final String error;
+  CapEntryFailure(this.error);
+}
+
+/// ================= LABEL =================
+class LabelEntryLoading extends UnloadingState {}
+
+class LabelEntrySuccess extends UnloadingState {
+  final String message;
+
+  LabelEntrySuccess(this.message);
 
   @override
-  List<Object?> get props => [
-    bottleId,
-    capId,
-    labelId,
-    cartonId,
-    monoCartonId,
-    isSubmitting,
-    isSuccess,
-    error,
-  ];
+  List<Object?> get props => [message];
+}
+
+class LabelEntryFailure extends UnloadingState {
+  final String error;
+
+  LabelEntryFailure(this.error);
+
+  @override
+  List<Object?> get props => [error];
+}
+
+/// ================= CARTON =================
+class CartonEntryLoading extends UnloadingState {}
+
+class CartonEntrySuccess extends UnloadingState {}
+
+class CartonEntryFailure extends UnloadingState {
+  final String error;
+  CartonEntryFailure(this.error);
+}
+
+/// ================= MONO CARTON =================
+class MonoCartonEntryLoading extends UnloadingState {}
+
+class MonoCartonEntrySuccess extends UnloadingState {}
+
+class MonoCartonEntryFailure extends UnloadingState {
+  final String error;
+  MonoCartonEntryFailure(this.error);
 }

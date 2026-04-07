@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:inventory_mobile_app/core/consts/globals.dart';
 import 'package:inventory_mobile_app/features/master/bloc/master_event.dart';
 import 'package:inventory_mobile_app/features/master/bloc/master_state.dart';
+import 'package:inventory_mobile_app/features/master/master_model/bottle_size_model.dart';
+import 'package:inventory_mobile_app/features/master/master_model/brand_model.dart';
 import 'package:inventory_mobile_app/features/master/master_model/party_model.dart';
 import 'package:inventory_mobile_app/features/master/master_repository/master_repo.dart';
 
@@ -14,6 +16,11 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
     on<GetCartonListEvent>(getCartonList);
     on<GetMonoCartonListEvent>(getMonoCartonList);
     on<FetchParties>(_onFetchParties);
+    on<FetchBrands>(_onFetchBrands);
+    on<FetchBottleSizes>(_onFetchBottleSizes);
+    on<FetchMappingBottleEvent>(getMappingBottleList);
+    on<FetchMappingLabelEvent>(getMappingLabelList);
+    on<FetchCombinationBottleEvent>(getCombinationBottleList);
   }
 
   Future<void> getBottleList(
@@ -86,22 +93,111 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
     }
   }
 
+  Future<void> _onFetchBottleSizes(
+    FetchBottleSizes event,
+    Emitter<MasterState> emit,
+  ) async {
+    try {
+      final response = await repository.fetchBottleSizes();
+
+      final sizes = (response as List)
+          .map((e) => BottleSizeModel.fromJson(e))
+          .toList();
+
+      logger.e("Fetched bottle sizes: $sizes");
+
+      emit(BottleSizeLoaded(sizes));
+    } catch (e) {
+      emit(BottleSizeError(e.toString()));
+    }
+  }
+
   Future<void> _onFetchParties(
     FetchParties event,
     Emitter<MasterState> emit,
   ) async {
-    emit(PartyLoading());
-
     try {
       final response = await repository.fetchParties();
 
-      final List<PartyModel> parties = (response as List)
+      final parties = (response as List)
           .map((e) => PartyModel.fromJson(e))
           .toList();
+
+      logger.e("Fetched parties: $parties");
 
       emit(PartyLoaded(parties));
     } catch (e) {
       emit(PartyError(e.toString()));
+    }
+  }
+
+  Future<void> _onFetchBrands(
+    FetchBrands event,
+    Emitter<MasterState> emit,
+  ) async {
+    try {
+      final response = await repository.fetchBrands();
+
+      final brands = (response as List)
+          .map((e) => BrandModel.fromJson(e))
+          .toList();
+
+      logger.e("Fetched brands: $brands");
+      emit(BrandLoaded(brands));
+    } catch (e) {
+      emit(BrandError(e.toString()));
+    }
+  }
+
+  Future<void> getMappingBottleList(
+    FetchMappingBottleEvent event,
+    Emitter<MasterState> emit,
+  ) async {
+    emit(GetMappingBottleListLoading());
+
+    try {
+      final result = await repository.fetchMappingBottle(
+        brandNameId: event.brandNameId,
+        bottleSizeId: event.bottleSizeId,
+      );
+
+      emit(GetMappingBottleListSuccess(result));
+    } catch (e) {
+      emit(GetMappingBottleListFailure(e.toString()));
+    }
+  }
+
+  Future<void> getCombinationBottleList(
+    FetchCombinationBottleEvent event,
+    Emitter<MasterState> emit,
+  ) async {
+    emit(GetCombinationBottleListLoading());
+
+    try {
+      final result = await repository.fetchCombinationBottle();
+
+      emit(GetCombinationBottleListSuccess(result));
+    } catch (e) {
+      emit(GetCombinationBottleListFailure(e.toString()));
+    }
+  }
+
+  Future<void> getMappingLabelList(
+    FetchMappingLabelEvent event,
+    Emitter<MasterState> emit,
+  ) async {
+    emit(GetMappingLabelListLoading());
+
+    try {
+      final result = await repository.fetchMappingLabel(
+        brandNameId: event.brandNameId,
+        bottleSizeId: event.bottleSizeId,
+        labelTypeId: event.labelTypeId,
+      );
+
+      emit(GetMappingLabelListSuccess(result));
+    } catch (e) {
+      emit(GetMappingLabelListFailure(e.toString()));
     }
   }
 }

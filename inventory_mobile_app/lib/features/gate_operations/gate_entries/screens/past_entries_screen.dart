@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:intl/intl.dart';
 import 'package:inventory_mobile_app/core/consts/appcolors.dart';
-
 import 'package:inventory_mobile_app/core/consts/snack_bar.dart';
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/bloc/gate_entry_bloc.dart';
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/bloc/gate_entry_event.dart';
@@ -20,7 +19,8 @@ class PastEntriesPage extends StatefulWidget {
 }
 
 class _PastEntriesPageState extends State<PastEntriesPage> {
-  int truckType = 1; // 1 = Raw, 2 = Empty
+  int truckType = 1;
+  String selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
   @override
   void initState() {
@@ -29,37 +29,50 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
   }
 
   void _fetch() {
-    final date = DateTime.now().toString().split(' ')[0];
-
     context.read<GateEntryBloc>().add(
-      FetchGateEntries(truckType: truckType, date: date),
+      FetchGateEntries(truckType: truckType, date: selectedDate),
     );
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.tryParse(selectedDate) ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        selectedDate = DateFormat('yyyy-MM-dd').format(picked);
+      });
+      _fetch();
+    }
+  }
+
+  String _formatTime() {
+    final now = TimeOfDay.now();
+    return "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-
       body: SafeArea(
         child: MultiBlocListener(
           listeners: [
-            /// ENTRY
             BlocListener<GateEntryBloc, GateEntryState>(
               listener: (context, state) {
                 if (state is GateEntryUpdateSuccess) {
                   Navigator.pop(context);
-
                   snackbar(
                     context,
                     color: Colors.green,
                     title: "Success",
                     message: state.message,
                   );
-
                   _fetch();
                 }
-
                 if (state is GateEntryUpdateFailure) {
                   snackbar(
                     context,
@@ -68,7 +81,6 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
                     message: state.message,
                   );
                 }
-
                 if (state is GateEntryDeleteSuccess) {
                   snackbar(
                     context,
@@ -76,10 +88,8 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
                     title: "Deleted",
                     message: state.message,
                   );
-
                   _fetch();
                 }
-
                 if (state is GateEntryDeleteFailure) {
                   snackbar(
                     context,
@@ -90,8 +100,6 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
                 }
               },
             ),
-
-            /// 🔥 EXIT (THIS WAS MISSING PROPERLY)
             BlocListener<GateExitBloc, GateExitState>(
               listener: (context, state) {
                 if (state is GateExitSuccess) {
@@ -101,10 +109,8 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
                     title: "Exited",
                     message: state.message,
                   );
-
-                  _fetch(); // 🔥 refresh list
+                  _fetch();
                 }
-
                 if (state is GateExitFailure) {
                   snackbar(
                     context,
@@ -118,111 +124,85 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
           ],
           child: Column(
             children: [
-              /// 🔥 TOGGLE
-              Padding(padding: const EdgeInsets.all(12), child: _toggle()),
-              BlocListener<GateEntryBloc, GateEntryState>(
-                listener: (context, state) {
-                  if (state is GateEntryUpdateSuccess) {
-                    Navigator.pop(context); // close dialog
-
-                    snackbar(
-                      context,
-                      color: Colors.green,
-                      title: "Success",
-                      message: state.message,
-                    );
-
-                    _fetch(); // 🔥 refresh list
-                  }
-
-                  if (state is GateEntryUpdateFailure) {
-                    snackbar(
-                      context,
-                      color: Colors.red,
-                      title: "Error",
-                      message: state.message,
-                    );
-                  }
-                  if (state is GateEntryDeleteSuccess) {
-                    snackbar(
-                      context,
-                      color: Colors.green,
-                      title: "Deleted",
-                      message: state.message,
-                    );
-
-                    _fetch(); // 🔥 refresh list
-                  }
-
-                  if (state is GateEntryDeleteFailure) {
-                    snackbar(
-                      context,
-                      color: Colors.red,
-                      title: "Error",
-                      message: state.message,
-                    );
-                  }
-                },
-
-                child: SizedBox.shrink(),
-              ),
-              BlocListener<GateExitBloc, GateExitState>(
-                listener: (context, state) {
-                  if (state is GateExitSuccess) {
-                    snackbar(
-                      context,
-                      color: Colors.green,
-                      title: "Exited",
-                      message: state.message,
-                    );
-
-                    _fetch(); // refresh list
-                  }
-
-                  if (state is GateExitFailure) {
-                    snackbar(
-                      context,
-                      color: Colors.red,
-                      title: "Error",
-                      message: state.message,
-                    );
-                  }
-                },
-                child: SizedBox.shrink(),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    // ── Toggle ──
+                    _toggle(),
+                    const SizedBox(height: 8),
+                    // ── Date Picker ──
+                    GestureDetector(
+                      onTap: _pickDate,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey.shade300),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              size: 18,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              selectedDate,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const Spacer(),
+                            Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.grey[600],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-              /// 🔥 LIST
+              // ── List ──
               Expanded(
                 child: BlocBuilder<GateEntryBloc, GateEntryState>(
                   builder: (context, state) {
                     if (state is GateEntryListLoading) {
                       return const Center(child: CircularProgressIndicator());
                     }
-
                     if (state is GateEntryListFailure) {
                       return Center(child: Text(state.message));
                     }
-
                     if (state is GateEntryListSuccess) {
-                      final list = state.entries;
-
-                      if (list.isEmpty) {
+                      if (state.entries.isEmpty) {
                         return const Center(
                           child: Text("No gate entries found"),
                         );
                       }
-
                       return ListView.separated(
                         padding: const EdgeInsets.all(12),
-                        itemCount: list.length,
+                        itemCount: state.entries.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          final item = list[index];
-                          return _gateEntryCard(item);
-                        },
+                        itemBuilder: (context, index) =>
+                            _gateEntryCard(state.entries[index]),
                       );
                     }
-
                     return const SizedBox();
                   },
                 ),
@@ -233,8 +213,6 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
       ),
     );
   }
-
-  /// ---------------- TOGGLE ----------------
 
   Widget _toggle() {
     return Row(
@@ -294,8 +272,6 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
     );
   }
 
-  /// ---------------- CARD ----------------
-
   Widget _gateEntryCard(GateEntryModel item) {
     return Container(
       decoration: BoxDecoration(
@@ -314,7 +290,6 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// HEADER
             Row(
               children: [
                 Icon(
@@ -358,18 +333,19 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
             const Divider(height: 20),
 
             if (truckType == 1)
-              _infoRow(Icons.business, "Party ID", item.partyId.toString()),
-
+              _infoRow(
+                Icons.business,
+                "Party ID",
+                item.partyId?.toString() ?? "-",
+              ),
             if (truckType == 1)
-              _infoRow(Icons.receipt_long, "Invoice", item.invoiceId!),
-
+              _infoRow(Icons.receipt_long, "Invoice", item.invoiceId ?? "-"),
             _infoRow(Icons.person, "Driver", item.driverName),
             _infoRow(Icons.phone, "Mobile", item.driverMobileNo.toString()),
             _infoRow(Icons.scale, "Weight", item.vehicleWeight.toString()),
 
             const SizedBox(height: 16),
 
-            /// ACTIONS
             Row(
               children: [
                 Expanded(
@@ -421,8 +397,6 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
     );
   }
 
-  /// ---------------- HELPERS ----------------
-
   Widget _infoRow(IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
@@ -463,32 +437,55 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
   }
 
   void _confirm(GateEntryModel item) {
+    final weightCtrl = TextEditingController(
+      text: item.vehicleWeight.toString(),
+    );
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Confirm Exit"),
-        content: const Text("Mark vehicle as exited?"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Enter out vehicle weight:"),
+            const SizedBox(height: 12),
+            TextField(
+              controller: weightCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Out Vehicle Weight",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text("Cancel"),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             onPressed: () {
               Navigator.pop(context);
-
               context.read<GateExitBloc>().add(
                 SubmitGateExitEvent(
                   id: item.id,
                   truckType: truckType,
-                  outVehicleWeight: item.vehicleWeight, // or input
-
-                  exitDate: DateTime.now().toString().split(' ')[0],
+                  outVehicleWeight:
+                      int.tryParse(weightCtrl.text) ?? item.vehicleWeight,
+                  exitDate: selectedDate,
                   exitTime: _formatTime(),
                 ),
               );
             },
-            child: const Text("Yes"),
+            child: const Text(
+              "Confirm Exit",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -501,8 +498,9 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
     final weightCtrl = TextEditingController(
       text: item.vehicleWeight.toString(),
     );
-    final mobileCtrl = TextEditingController(text: item.driverMobileNo);
-
+    final mobileCtrl = TextEditingController(
+      text: item.driverMobileNo.toString(),
+    );
     final invoiceCtrl = TextEditingController(text: item.invoiceId ?? "");
     final partyCtrl = TextEditingController(
       text: item.partyId?.toString() ?? "",
@@ -510,65 +508,49 @@ class _PastEntriesPageState extends State<PastEntriesPage> {
 
     showDialog(
       context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: const Text("Update Gate Entry"),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                _field(driverCtrl, "Driver Name"),
-                _field(vehicleCtrl, "Vehicle No"),
-                _field(weightCtrl, "Vehicle Weight"),
-                _field(mobileCtrl, "Driver Mobile"),
-
-                /// ✅ Only for RAW
-                if (truckType == 1) _field(invoiceCtrl, "Invoice"),
-                if (truckType == 1) _field(partyCtrl, "Party ID"),
-              ],
-            ),
+      builder: (_) => AlertDialog(
+        title: const Text("Update Gate Entry"),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              _field(driverCtrl, "Driver Name"),
+              _field(vehicleCtrl, "Vehicle No"),
+              _field(weightCtrl, "Vehicle Weight"),
+              _field(mobileCtrl, "Driver Mobile"),
+              if (truckType == 1) _field(invoiceCtrl, "Invoice"),
+              if (truckType == 1) _field(partyCtrl, "Party ID"),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                context.read<GateEntryBloc>().add(
-                  UpdateGateEntryEvent(
-                    id: item.id,
-                    truckType: truckType,
-
-                    driverName: driverCtrl.text.trim(),
-                    vehicleNo: vehicleCtrl.text.trim(),
-                    vehicleWeight: int.tryParse(weightCtrl.text) ?? 0,
-                    driverMobileNo: mobileCtrl.text.trim(),
-
-                    date: DateTime.now().toString().split(' ')[0],
-                    time: _formatTime(),
-
-                    invoiceId: truckType == 1 ? invoiceCtrl.text.trim() : null,
-                    partyId: truckType == 1
-                        ? int.tryParse(partyCtrl.text)
-                        : null,
-                  ),
-                );
-              },
-              child: const Text("Update"),
-            ),
-          ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<GateEntryBloc>().add(
+                UpdateGateEntryEvent(
+                  id: item.id,
+                  truckType: truckType,
+                  driverName: driverCtrl.text.trim(),
+                  vehicleNo: vehicleCtrl.text.trim(),
+                  vehicleWeight: int.tryParse(weightCtrl.text) ?? 0,
+                  driverMobileNo: mobileCtrl.text.trim(),
+                  date: selectedDate,
+                  time: _formatTime(),
+                  invoiceId: truckType == 1 ? invoiceCtrl.text.trim() : null,
+                  partyId: truckType == 1 ? int.tryParse(partyCtrl.text) : null,
+                ),
+              );
+            },
+            child: const Text("Update"),
+          ),
+        ],
+      ),
     );
   }
-
-  String _formatTime() {
-    final now = TimeOfDay.now();
-    return "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
-  }
 }
-
-/// ---------------- FIELD ----------------
 
 Widget _field(TextEditingController controller, String label) {
   return Padding(

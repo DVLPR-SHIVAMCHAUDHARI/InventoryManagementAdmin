@@ -55,28 +55,58 @@ class SwitchmonoCartonId extends UnloadingEvent {
 
 /// Submit Bottle Entry
 class SubmitBottleEntry extends UnloadingEvent {
-  final int gateId;
   final String palletCode;
-  final int palletQty;
-  final int bottleId;
-  final int warehouseId;
+  final int casesQuantity;
+  final int mappingBottle;
+  final int combinationBottleBoxes;
 
   const SubmitBottleEntry({
-    required this.gateId,
     required this.palletCode,
-    required this.palletQty,
-    required this.bottleId,
-    required this.warehouseId,
+    required this.casesQuantity,
+    required this.mappingBottle,
+    required this.combinationBottleBoxes,
   });
 
   @override
   List<Object?> get props => [
-    gateId,
     palletCode,
-    palletQty,
-    bottleId,
-    warehouseId,
+    casesQuantity,
+    mappingBottle,
+    combinationBottleBoxes,
   ];
+}
+
+class UpdateBottleEntry extends UnloadingEvent {
+  final int id;
+  final String palletCode;
+  final int casesQuantity;
+  final int mappingBottle;
+  final int combinationBottleBoxes;
+
+  UpdateBottleEntry({
+    required this.id,
+    required this.palletCode,
+    required this.casesQuantity,
+    required this.mappingBottle,
+    required this.combinationBottleBoxes,
+  });
+  @override
+  List<Object?> get props => [
+    id,
+    palletCode,
+    casesQuantity,
+    mappingBottle,
+    combinationBottleBoxes,
+  ];
+}
+
+class DeleteBottleEntry extends UnloadingEvent {
+  final int id;
+
+  const DeleteBottleEntry({required this.id});
+
+  @override
+  List<Object?> get props => [id];
 }
 
 /// Submit cap Entry
@@ -101,32 +131,6 @@ class SubmitCapEntry extends UnloadingEvent {
     palletCode,
     palletQty,
     capId,
-    warehouseId,
-  ];
-}
-
-/// Submit label Entry
-class SubmitLabelEntry extends UnloadingEvent {
-  final int gateId;
-  final String palletCode;
-  final int palletQty;
-  final int labelId;
-  final int warehouseId;
-
-  const SubmitLabelEntry({
-    required this.gateId,
-    required this.palletCode,
-    required this.palletQty,
-    required this.labelId,
-    required this.warehouseId,
-  });
-
-  @override
-  List<Object?> get props => [
-    gateId,
-    palletCode,
-    palletQty,
-    labelId,
     warehouseId,
   ];
 }
@@ -181,4 +185,75 @@ class SubmitMonoCartonEntry extends UnloadingEvent {
     monocartonId,
     warehouseId,
   ];
+}
+
+/// ==========================
+/// SUBMIT LABEL ENTRY
+/// ==========================
+class SubmitLabelEntry extends UnloadingEvent {
+  final String palletCode;
+  final int casesQuantity;
+  final int mappingLabel;
+  final int rollPerCase;
+  final int labelPerRoll;
+
+  const SubmitLabelEntry({
+    required this.palletCode,
+    required this.casesQuantity,
+    required this.mappingLabel,
+    required this.rollPerCase,
+    required this.labelPerRoll,
+  });
+
+  @override
+  List<Object?> get props => [
+    palletCode,
+    casesQuantity,
+    mappingLabel,
+    rollPerCase,
+    labelPerRoll,
+  ];
+}
+
+/// ==========================
+/// UPDATE LABEL ENTRY
+/// ==========================
+class UpdateLabelEntry extends UnloadingEvent {
+  final int id;
+  final String palletCode;
+  final int casesQuantity;
+  final int mappingLabel;
+  final int rollPerCase;
+  final int labelPerRoll;
+
+  UpdateLabelEntry({
+    required this.id,
+    required this.palletCode,
+    required this.casesQuantity,
+    required this.mappingLabel,
+    required this.rollPerCase,
+    required this.labelPerRoll,
+  });
+
+  @override
+  List<Object?> get props => [
+    id,
+    palletCode,
+    casesQuantity,
+    mappingLabel,
+    rollPerCase,
+    labelPerRoll,
+  ];
+}
+
+/// ==========================
+/// DELETE LABEL ENTRY
+/// ==========================
+class DeleteLabelEntry extends UnloadingEvent {
+  final int id;
+
+  const DeleteLabelEntry({required this.id});
+
+  @override
+  List<Object?> get props => [id];
 }

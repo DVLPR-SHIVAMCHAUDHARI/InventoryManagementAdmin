@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:inventory_mobile_app/core/consts/globals.dart';
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/bloc/gate_entry_event.dart';
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/bloc/gate_entry_state.dart';
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/repository/gate_entry_repo.dart';

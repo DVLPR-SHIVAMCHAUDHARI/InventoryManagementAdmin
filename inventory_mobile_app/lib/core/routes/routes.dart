@@ -4,6 +4,7 @@ import 'package:inventory_mobile_app/features/authentication/bloc/auth_bloc.dart
 import 'package:inventory_mobile_app/features/authentication/screens/login_screen.dart';
 
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/screens/gate_entry_screen.dart';
+import 'package:inventory_mobile_app/features/gate_operations/gate_exits/screens/gate_exit_screen.dart';
 
 import 'package:inventory_mobile_app/features/gate_operations/screens/gate_operations_screen.dart';
 import 'package:inventory_mobile_app/features/homescreen/pages/homescreen.dart';
@@ -36,6 +37,7 @@ enum Routes {
   weightBridge,
   weightBridgeExit,
   homeScreen,
+  gateExit,
   // updateGateEntry,
 }
 
@@ -87,13 +89,13 @@ GoRouter router = GoRouter(
         return GateEntryScreen();
       },
     ),
-    // GoRoute(
-    //   path: "/updateGateEntry",
-    //   name: Routes.updateGateEntry.name,
-    //   builder: (context, state) {
-    //     return UpdateGateEntryScreen();
-    //   },
-    // ),
+    GoRoute(
+      path: "/gateExit",
+      name: Routes.gateExit.name,
+      builder: (context, state) {
+        return GateExitScreen();
+      },
+    ),
     GoRoute(
       path: "/weight-Bridge",
       name: Routes.weightBridge.name,

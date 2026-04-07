@@ -18,3 +18,47 @@ class GetMonoCartonListEvent extends MasterEvent {}
 class FetchParties extends MasterEvent {
   FetchParties();
 }
+
+class FetchBrands extends MasterEvent {
+  FetchBrands();
+}
+
+class FetchBottleSizes extends MasterEvent {}
+
+/// ==========================
+/// FETCH MAPPING BOTTLE
+/// ==========================
+class FetchMappingBottleEvent extends MasterEvent {
+  final int? brandNameId;
+  final int? bottleSizeId;
+
+  FetchMappingBottleEvent({this.brandNameId, this.bottleSizeId});
+
+  @override
+  List<Object?> get props => [brandNameId, bottleSizeId];
+}
+
+/// ==========================
+/// FETCH COMBINATION BOTTLE
+/// ==========================
+class FetchCombinationBottleEvent extends MasterEvent {
+  FetchCombinationBottleEvent();
+}
+
+/// ==========================
+/// FETCH MAPPING LABEL
+/// ==========================
+class FetchMappingLabelEvent extends MasterEvent {
+  final int? brandNameId;
+  final int? bottleSizeId;
+  final int? labelTypeId;
+
+  FetchMappingLabelEvent({
+    this.brandNameId,
+    this.bottleSizeId,
+    this.labelTypeId,
+  });
+
+  @override
+  List<Object?> get props => [brandNameId, bottleSizeId, labelTypeId];
+}

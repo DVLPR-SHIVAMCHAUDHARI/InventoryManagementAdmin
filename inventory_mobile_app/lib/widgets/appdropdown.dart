@@ -26,22 +26,34 @@ class AppDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ── filter deleted items ──
+    final filteredItems = items.where((e) {
+      try {
+        return (e as dynamic).isDeleted != 1;
+      } catch (_) {
+        return true;
+      }
+    }).toList();
+
+    // ── match value from filtered list ──
+    final matchedValue = value == null
+        ? null
+        : filteredItems.cast<T?>().firstWhere(
+            (e) => e == value,
+            orElse: () => null,
+          );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        /// Label
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 14,
-            // fontWeight: FontWeight.w600,
-            color: Color(0xff383838),
-          ),
+          style: const TextStyle(fontSize: 14, color: Color(0xff383838)),
         ),
         const SizedBox(height: 6),
 
         DropdownButtonFormField2<T>(
-          value: value,
+          value: matchedValue, // ✅ matched from filtered list
           isExpanded: true,
           onChanged: onChanged,
           validator: isRequired
@@ -52,10 +64,9 @@ class AppDropdown<T> extends StatelessWidget {
                   return null;
                 }
               : null,
-
           decoration: InputDecoration(
             filled: true,
-
+            fillColor: Colors.grey.shade100,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 12,
               vertical: 8,
@@ -73,7 +84,6 @@ class AppDropdown<T> extends StatelessWidget {
               borderSide: const BorderSide(color: Colors.red),
             ),
           ),
-
           hint: Text(
             hint,
             style: const TextStyle(
@@ -82,26 +92,21 @@ class AppDropdown<T> extends StatelessWidget {
               color: Colors.grey,
             ),
           ),
-
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: Colors.black,
           ),
-
           iconStyleData: const IconStyleData(
             icon: Icon(Icons.arrow_drop_down),
             iconEnabledColor: Colors.black,
           ),
-
-          items: items
+          items: filteredItems
               .map(
                 (e) => DropdownMenuItem<T>(
                   value: e,
                   child: Text(
-                    itemLabel != null
-                        ? itemLabel!(e) // ✅ object support
-                        : e.toString(), // ✅ fallback
+                    itemLabel != null ? itemLabel!(e) : e.toString(),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -111,7 +116,6 @@ class AppDropdown<T> extends StatelessWidget {
                 ),
               )
               .toList(),
-
           dropdownStyleData: DropdownStyleData(
             maxHeight: 220,
             decoration: BoxDecoration(
@@ -120,7 +124,6 @@ class AppDropdown<T> extends StatelessWidget {
               border: Border.all(color: AppColors.primary.withOpacity(0.2)),
             ),
           ),
-
           menuItemStyleData: const MenuItemStyleData(
             height: 40,
             padding: EdgeInsets.symmetric(horizontal: 12),

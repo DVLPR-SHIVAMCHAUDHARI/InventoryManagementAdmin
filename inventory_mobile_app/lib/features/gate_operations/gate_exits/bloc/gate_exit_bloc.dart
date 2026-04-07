@@ -9,6 +9,53 @@ class GateExitBloc extends Bloc<GateExitEvent, GateExitState> {
 
   GateExitBloc() : super(GateExitInitial()) {
     on<SubmitGateExitEvent>(_submitGateExit);
+    on<FetchGateExitsEvent>((event, emit) async {
+      emit(GateExitListLoading());
+      try {
+        final list = await repo.listGateExit(
+          truckType: event.truckType,
+          exitDate: event.exitDate,
+        );
+        emit(GateExitListSuccess(list));
+      } catch (e) {
+        emit(GateExitListFailure(e.toString()));
+      }
+    });
+
+    on<UpdateGateExitEvent>((event, emit) async {
+      emit(GateExitLoading());
+      try {
+        final result = await repo.updateGateExit(
+          id: event.id,
+          truckType: event.truckType,
+          outVehicleWeight: event.outVehicleWeight,
+        );
+        if (result["success"] != true) {
+          emit(GateExitUpdateFailure(result["message"]));
+          return;
+        }
+        emit(GateExitUpdateSuccess(result["message"]));
+      } catch (e) {
+        emit(GateExitUpdateFailure(e.toString()));
+      }
+    });
+
+    on<DeleteGateExitEvent>((event, emit) async {
+      emit(GateExitLoading());
+      try {
+        final result = await repo.deleteGateExit(
+          id: event.id,
+          truckType: event.truckType,
+        );
+        if (result["success"] != true) {
+          emit(GateExitDeleteFailure(result["message"]));
+          return;
+        }
+        emit(GateExitDeleteSuccess(result["message"]));
+      } catch (e) {
+        emit(GateExitDeleteFailure(e.toString()));
+      }
+    });
   }
 
   Future<void> _submitGateExit(

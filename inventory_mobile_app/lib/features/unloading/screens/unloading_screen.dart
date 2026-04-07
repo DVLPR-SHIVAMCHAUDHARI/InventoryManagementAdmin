@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:inventory_mobile_app/core/consts/appcolors.dart';
 import 'package:inventory_mobile_app/features/master/bloc/master_bloc.dart';
+import 'package:inventory_mobile_app/features/unloading/bloc/bottle_list_bloc/bottle_list_bloc.dart';
+import 'package:inventory_mobile_app/features/unloading/bloc/label_list_bloc/label_list_bloc.dart';
 import 'package:inventory_mobile_app/features/unloading/bloc/unloading_bloc.dart';
 import 'package:inventory_mobile_app/features/unloading/repository/unloading_repository.dart';
 import 'package:inventory_mobile_app/features/unloading/widgets/bottle_entry_form.dart';
@@ -10,7 +13,6 @@ import 'package:inventory_mobile_app/features/unloading/widgets/capentryform.dar
 import 'package:inventory_mobile_app/features/unloading/widgets/cartonentryform.dart';
 import 'package:inventory_mobile_app/features/unloading/widgets/labelentryform.dart';
 import 'package:inventory_mobile_app/features/unloading/widgets/monocartonentryform.dart';
-import 'package:inventory_mobile_app/widgets/appdropdown.dart';
 
 class UnloadingPage extends StatefulWidget {
   const UnloadingPage({super.key});
@@ -34,62 +36,139 @@ class _UnloadingPageState extends State<UnloadingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+
       appBar: AppBar(
+        leading: BackButton(color: Colors.white),
         backgroundColor: AppColors.primary,
         title: const Text(
           "Raw Material Entry",
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           child: Column(
             children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: 300.w,
-                  child: AppDropdown(
-                    title: "Select Operation",
-                    hint: "",
-                    items: sections,
-                    value: sections[selectedSection],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedSection = sections.indexOf(value!);
-                      });
-                    },
-                  ),
+              /// 🔥 Tabs instead of dropdown
+              SizedBox(
+                height: 45.h,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: sections.length,
+                  separatorBuilder: (_, __) => SizedBox(width: 10.w),
+                  itemBuilder: (context, index) {
+                    final isSelected = selectedSection == index;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedSection = index;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 18.w,
+                          vertical: 10.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.primary : Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primary
+                                : Colors.grey.shade300,
+                          ),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.primary.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        child: Center(
+                          child: Text(
+                            sections[index],
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-              const SizedBox(height: 20),
+
+              SizedBox(height: 20.h),
+
+              /// 🔥 Form Container
               Expanded(
                 child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
+                  duration: const Duration(milliseconds: 300),
                   child: Container(
                     key: ValueKey(selectedSection),
-                    padding: const EdgeInsets.all(16),
+                    // padding: EdgeInsets.all(18.w),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: const [
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
                         BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 8,
-                          offset: Offset(0, 3),
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: MultiBlocProvider(
                       providers: [
-                        BlocProvider(create: (context) => MasterBloc()),
                         BlocProvider(
-                          create: (context) =>
+                          create: (context) {
+                            final now = DateTime.now();
+                            final yesterday = now.subtract(
+                              const Duration(days: 1),
+                            );
+
+                            return BottleListBloc(repo: UnloadingRepository())
+                              ..add(
+                                FetchBottleListEvent(
+                                  fromDate: DateFormat(
+                                    'yyyy-MM-dd',
+                                  ).format(yesterday),
+                                  toDate: DateFormat('yyyy-MM-dd').format(now),
+                                ),
+                              );
+                          },
+                        ),
+                        BlocProvider(
+                          create: (context) {
+                            final now = DateTime.now();
+                            final yesterday = now.subtract(
+                              const Duration(days: 1),
+                            );
+
+                            return LabelListBloc(repo: UnloadingRepository())
+                              ..add(
+                                FetchLabelListEvent(
+                                  fromDate: DateFormat(
+                                    'yyyy-MM-dd',
+                                  ).format(yesterday),
+                                  toDate: DateFormat('yyyy-MM-dd').format(now),
+                                ),
+                              );
+                          },
+                        ),
+                        BlocProvider(
+                          create: (_) =>
                               UnloadingBloc(repo: UnloadingRepository()),
                         ),
+                        BlocProvider(create: (_) => MasterBloc()),
                       ],
                       child: _buildForm(selectedSection),
                     ),
@@ -106,15 +185,15 @@ class _UnloadingPageState extends State<UnloadingPage> {
   Widget _buildForm(int index) {
     switch (index) {
       case 0:
-        return BottleEntryForm();
+        return BottleCreateScreen();
       case 1:
-        return LabelEntryForm();
+        return LabelCreateScreen();
       case 2:
-        return CapEntryForm();
+        return BottleCreateScreen();
       case 3:
-        return CartonEntryForm();
+        return BottleCreateScreen();
       case 4:
-        return MonoCartonEntryForm();
+        return BottleCreateScreen();
       default:
         return const SizedBox();
     }

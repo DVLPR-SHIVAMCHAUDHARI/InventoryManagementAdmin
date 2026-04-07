@@ -1,4 +1,9 @@
 import 'package:equatable/equatable.dart';
+import 'package:inventory_mobile_app/features/master/master_model/bottle_combination_model.dart';
+import 'package:inventory_mobile_app/features/master/master_model/bottle_size_model.dart';
+import 'package:inventory_mobile_app/features/master/master_model/brand_model.dart';
+import 'package:inventory_mobile_app/features/master/master_model/mapping_bottle_model.dart';
+import 'package:inventory_mobile_app/features/master/master_model/mapping_label_model.dart';
 import 'package:inventory_mobile_app/features/master/master_model/party_model.dart';
 
 abstract class MasterState extends Equatable {
@@ -148,4 +153,106 @@ class PartyError extends MasterState {
 
   @override
   List<Object?> get props => [message];
+}
+
+class BrandLoading extends MasterState {
+  BrandLoading();
+}
+
+class BrandLoaded extends MasterState {
+  final List<BrandModel> brands;
+
+  BrandLoaded(this.brands);
+
+  @override
+  List<Object?> get props => [brands];
+}
+
+class BrandError extends MasterState {
+  final String message;
+
+  BrandError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class BottleSizeLoading extends MasterState {}
+
+class BottleSizeLoaded extends MasterState {
+  final List<BottleSizeModel> sizes;
+
+  BottleSizeLoaded(this.sizes);
+}
+
+class BottleSizeError extends MasterState {
+  final String error;
+
+  BottleSizeError(this.error);
+}
+////////////////////////////////////////////////////////////
+/// MAPPING BOTTLE LIST
+////////////////////////////////////////////////////////////
+
+class GetMappingBottleListLoading extends MasterState {}
+
+class GetMappingBottleListSuccess extends MasterState {
+  final List<MappingBottleModel> mappingBottles;
+
+  GetMappingBottleListSuccess(this.mappingBottles);
+
+  @override
+  List<Object?> get props => [mappingBottles];
+}
+
+class GetMappingBottleListFailure extends MasterState {
+  final String error;
+
+  GetMappingBottleListFailure(this.error);
+
+  @override
+  List<Object?> get props => [error];
+}
+////////////////////////////////////////////////////////////
+/// COMBINATION BOTTLE LIST
+////////////////////////////////////////////////////////////
+
+class GetCombinationBottleListLoading extends MasterState {}
+
+class GetCombinationBottleListSuccess extends MasterState {
+  final List<BottleCombinationModel> combinations;
+
+  GetCombinationBottleListSuccess(this.combinations);
+
+  @override
+  List<Object?> get props => [combinations];
+}
+
+class GetCombinationBottleListFailure extends MasterState {
+  final String error;
+
+  GetCombinationBottleListFailure(this.error);
+
+  @override
+  List<Object?> get props => [error];
+}
+
+class GetMappingLabelListLoading extends MasterState {}
+
+class GetMappingLabelListSuccess extends MasterState {
+  final List<MappingLabelModel> mappingLabels;
+
+  GetMappingLabelListSuccess(this.mappingLabels);
+
+  @override
+  List<Object?> get props => [mappingLabels];
+}
+
+class GetMappingLabelListFailure extends MasterState {
+  final String error;
+
+  GetMappingLabelListFailure(this.error);
+
+  @override
+  List<Object?> get props => [error];
 }

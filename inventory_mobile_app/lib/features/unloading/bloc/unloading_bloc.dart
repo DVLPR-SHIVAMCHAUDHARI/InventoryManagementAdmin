@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:inventory_mobile_app/features/unloading/repository/unloading_repository.dart';
 import 'unloading_event.dart';
 import 'unloading_state.dart';
@@ -6,63 +7,63 @@ import 'unloading_state.dart';
 class UnloadingBloc extends Bloc<UnloadingEvent, UnloadingState> {
   final UnloadingRepository repo;
 
-  UnloadingBloc({required this.repo}) : super(const UnloadingState()) {
-    /// =========================
-    /// SWITCH EVENTS
-    /// =========================
-
-    on<SwitchBottleId>((event, emit) {
-      emit(state.copyWith(bottleId: event.bottleId));
-    });
-
-    on<SwitchcapId>((event, emit) {
-      emit(state.copyWith(capId: event.capId));
-    });
-
-    on<SwitchLabelId>((event, emit) {
-      emit(state.copyWith(labelId: event.labelId));
-    });
-
-    on<SwitchCartonId>((event, emit) {
-      emit(state.copyWith(cartonId: event.cartonId));
-    });
-
-    on<SwitchmonoCartonId>((event, emit) {
-      emit(state.copyWith(monoCartonId: event.monoCartonId));
-    });
-
+  UnloadingBloc({required this.repo}) : super(UnloadingInitial()) {
     /// =========================
     /// SUBMIT BOTTLE
     /// =========================
-
     on<SubmitBottleEntry>((event, emit) async {
-      emit(state.copyWith(isSubmitting: true, error: null));
+      emit(BottleEntryLoading());
 
       try {
-        await repo.rawBottleEntry(
-          gateId: event.gateId,
+        final result = await repo.rawBottleEntry(
+          gateId: 1,
           palletUniqueCode: event.palletCode,
-          palletQuanitity: event.palletQty,
-          bottleId: event.bottleId,
-          rackId: event.warehouseId,
+          casesQuantity: event.casesQuantity,
+          mappingBottle: event.mappingBottle,
+          combinationBottleBoxes: event.combinationBottleBoxes,
         );
 
-        emit(
-          state.copyWith(isSubmitting: false, isSuccess: true, bottleId: null),
-        );
-
-        emit(state.copyWith(isSuccess: false));
+        emit(BottleEntrySuccess(result));
       } catch (e) {
-        emit(state.copyWith(isSubmitting: false, error: e.toString()));
+        emit(BottleEntryFailure(e.toString()));
+      }
+    });
+
+    on<UpdateBottleEntry>((event, emit) async {
+      emit(BottleEntryLoading());
+
+      try {
+        final result = await repo.updateBottleEntry(
+          id: event.id,
+          gateId: 1,
+          palletUniqueCode: event.palletCode,
+          casesQuantity: event.casesQuantity,
+          mappingBottle: event.mappingBottle,
+          combinationBottleBoxes: event.combinationBottleBoxes,
+        );
+
+        emit(BottleEntrySuccess(result));
+      } catch (e) {
+        emit(BottleEntryFailure(e.toString()));
+      }
+    });
+    on<DeleteBottleEntry>((event, emit) async {
+      emit(BottleEntryLoading());
+
+      try {
+        final result = await repo.deleteBottleEntry(id: event.id);
+
+        emit(BottleEntrySuccess(result));
+      } catch (e) {
+        emit(BottleEntryFailure(e.toString()));
       }
     });
 
     /// =========================
     /// SUBMIT CAP
     /// =========================
-
     on<SubmitCapEntry>((event, emit) async {
-      emit(state.copyWith(isSubmitting: true, error: null));
+      emit(CapEntryLoading());
 
       try {
         await repo.rawCapEntry(
@@ -73,46 +74,71 @@ class UnloadingBloc extends Bloc<UnloadingEvent, UnloadingState> {
           rackId: event.warehouseId,
         );
 
-        emit(state.copyWith(isSubmitting: false, isSuccess: true, capId: null));
-
-        emit(state.copyWith(isSuccess: false));
+        emit(CapEntrySuccess());
       } catch (e) {
-        emit(state.copyWith(isSubmitting: false, error: e.toString()));
+        emit(CapEntryFailure(e.toString()));
       }
     });
 
     /// =========================
     /// SUBMIT LABEL
     /// =========================
-
     on<SubmitLabelEntry>((event, emit) async {
-      emit(state.copyWith(isSubmitting: true, error: null));
+      emit(LabelEntryLoading());
 
       try {
-        await repo.rawLabelEntry(
-          gateId: event.gateId,
+        final result = await repo.rawLabelEntry(
+          gateId: 1,
           palletUniqueCode: event.palletCode,
-          palletQuanitity: event.palletQty,
-          labelId: event.labelId,
-          rackId: event.warehouseId,
+          casesQuantity: event.casesQuantity,
+          mappingLabel: event.mappingLabel,
+          rollPerCase: event.rollPerCase,
+          labelPerRoll: event.labelPerRoll,
         );
 
-        emit(
-          state.copyWith(isSubmitting: false, isSuccess: true, labelId: null),
-        );
-
-        emit(state.copyWith(isSuccess: false));
+        emit(LabelEntrySuccess(result));
       } catch (e) {
-        emit(state.copyWith(isSubmitting: false, error: e.toString()));
+        emit(LabelEntryFailure(e.toString()));
+      }
+    });
+
+    on<UpdateLabelEntry>((event, emit) async {
+      emit(LabelEntryLoading());
+
+      try {
+        final result = await repo.updateLabelEntry(
+          id: event.id,
+          gateId: 1,
+          palletUniqueCode: event.palletCode,
+          casesQuantity: event.casesQuantity,
+          mappingLabel: event.mappingLabel,
+          rollPerCase: event.rollPerCase,
+          labelPerRoll: event.labelPerRoll,
+        );
+
+        emit(LabelEntrySuccess(result));
+      } catch (e) {
+        emit(LabelEntryFailure(e.toString()));
+      }
+    });
+
+    on<DeleteLabelEntry>((event, emit) async {
+      emit(LabelEntryLoading());
+
+      try {
+        final result = await repo.deleteLabelEntry(id: event.id);
+
+        emit(LabelEntrySuccess(result));
+      } catch (e) {
+        emit(LabelEntryFailure(e.toString()));
       }
     });
 
     /// =========================
     /// SUBMIT CARTON
     /// =========================
-
     on<SubmitCartonEntry>((event, emit) async {
-      emit(state.copyWith(isSubmitting: true, error: null));
+      emit(CartonEntryLoading());
 
       try {
         await repo.rawCartonEntry(
@@ -123,22 +149,17 @@ class UnloadingBloc extends Bloc<UnloadingEvent, UnloadingState> {
           rackId: event.warehouseId,
         );
 
-        emit(
-          state.copyWith(isSubmitting: false, isSuccess: true, cartonId: null),
-        );
-
-        emit(state.copyWith(isSuccess: false));
+        emit(CartonEntrySuccess());
       } catch (e) {
-        emit(state.copyWith(isSubmitting: false, error: e.toString()));
+        emit(CartonEntryFailure(e.toString()));
       }
     });
 
     /// =========================
     /// SUBMIT MONO CARTON
     /// =========================
-
     on<SubmitMonoCartonEntry>((event, emit) async {
-      emit(state.copyWith(isSubmitting: true, error: null));
+      emit(MonoCartonEntryLoading());
 
       try {
         await repo.rawMonoCartonEntry(
@@ -149,17 +170,9 @@ class UnloadingBloc extends Bloc<UnloadingEvent, UnloadingState> {
           rackId: event.warehouseId,
         );
 
-        emit(
-          state.copyWith(
-            isSubmitting: false,
-            isSuccess: true,
-            monoCartonId: null,
-          ),
-        );
-
-        emit(state.copyWith(isSuccess: false));
+        emit(MonoCartonEntrySuccess());
       } catch (e) {
-        emit(state.copyWith(isSubmitting: false, error: e.toString()));
+        emit(MonoCartonEntryFailure(e.toString()));
       }
     });
   }

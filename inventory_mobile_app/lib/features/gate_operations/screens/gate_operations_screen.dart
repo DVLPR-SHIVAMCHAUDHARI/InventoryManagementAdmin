@@ -47,7 +47,7 @@ class GateOperationsPage extends StatelessWidget {
               subtitle: 'Truck Exit',
               color: Colors.red,
               onTap: () {
-                // router.pushNamed(Routes.gateExit.name);
+                router.pushNamed(Routes.gateExit.name);
               },
             ),
           ],

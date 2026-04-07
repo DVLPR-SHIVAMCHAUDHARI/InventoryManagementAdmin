@@ -8,6 +8,8 @@ import 'package:inventory_mobile_app/features/gate_operations/gate_exits/bloc/ga
 
 import 'package:inventory_mobile_app/features/master/bloc/master_bloc.dart';
 import 'package:inventory_mobile_app/features/master/bloc/master_event.dart';
+import 'package:inventory_mobile_app/features/master/bloc/master_party_bloc.dart';
+import 'package:inventory_mobile_app/features/master/master_repository/master_repo.dart';
 
 class GateEntryScreen extends StatelessWidget {
   const GateEntryScreen({super.key});
@@ -72,7 +74,8 @@ class GateEntryScreen extends StatelessWidget {
             physics: NeverScrollableScrollPhysics(),
             children: [
               BlocProvider(
-                create: (context) => MasterBloc()..add(FetchParties()),
+                create: (context) =>
+                    PartyBloc(repository: MasterRepo())..add(FetchParties()),
                 child: NewGateEntryPage(),
               ),
 

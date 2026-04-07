@@ -15,16 +15,6 @@ class GetCartonListEvent extends MasterEvent {}
 
 class GetMonoCartonListEvent extends MasterEvent {}
 
-class FetchParties extends MasterEvent {
-  FetchParties();
-}
-
-class FetchBrands extends MasterEvent {
-  FetchBrands();
-}
-
-class FetchBottleSizes extends MasterEvent {}
-
 /// ==========================
 /// FETCH MAPPING BOTTLE
 /// ==========================

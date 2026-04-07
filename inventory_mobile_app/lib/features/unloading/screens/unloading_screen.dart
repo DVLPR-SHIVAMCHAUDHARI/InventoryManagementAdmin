@@ -3,7 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:inventory_mobile_app/core/consts/appcolors.dart';
+import 'package:inventory_mobile_app/features/master/bloc/bottle_size_bloc.dart';
+import 'package:inventory_mobile_app/features/master/bloc/brand_bloc.dart';
 import 'package:inventory_mobile_app/features/master/bloc/master_bloc.dart';
+import 'package:inventory_mobile_app/features/master/bloc/master_event.dart';
+import 'package:inventory_mobile_app/features/master/bloc/master_party_bloc.dart';
+import 'package:inventory_mobile_app/features/master/bloc/master_state.dart';
+import 'package:inventory_mobile_app/features/master/master_model/mapping_label_model.dart';
+import 'package:inventory_mobile_app/features/master/master_repository/master_repo.dart';
 import 'package:inventory_mobile_app/features/unloading/bloc/bottle_list_bloc/bottle_list_bloc.dart';
 import 'package:inventory_mobile_app/features/unloading/bloc/label_list_bloc/label_list_bloc.dart';
 import 'package:inventory_mobile_app/features/unloading/bloc/unloading_bloc.dart';
@@ -168,7 +175,27 @@ class _UnloadingPageState extends State<UnloadingPage> {
                           create: (_) =>
                               UnloadingBloc(repo: UnloadingRepository()),
                         ),
-                        BlocProvider(create: (_) => MasterBloc()),
+
+                        BlocProvider(
+                          create: (_) =>
+                              MasterBloc()
+                                ..add(FetchMappingLabelEvent(labelTypeId: 1)),
+                        ),
+                        BlocProvider(
+                          create: (_) =>
+                              PartyBloc(repository: MasterRepo())
+                                ..add(FetchParties()),
+                        ),
+                        BlocProvider(
+                          create: (_) =>
+                              BrandBloc(repository: MasterRepo())
+                                ..add(FetchBrands()),
+                        ),
+                        BlocProvider(
+                          create: (_) =>
+                              BottleSizeBloc(repository: MasterRepo())
+                                ..add(FetchBottleSizes()),
+                        ),
                       ],
                       child: _buildForm(selectedSection),
                     ),

@@ -15,9 +15,7 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
     on<GetLabelListEvent>(getLabelList);
     on<GetCartonListEvent>(getCartonList);
     on<GetMonoCartonListEvent>(getMonoCartonList);
-    on<FetchParties>(_onFetchParties);
-    on<FetchBrands>(_onFetchBrands);
-    on<FetchBottleSizes>(_onFetchBottleSizes);
+
     on<FetchMappingBottleEvent>(getMappingBottleList);
     on<FetchMappingLabelEvent>(getMappingLabelList);
     on<FetchCombinationBottleEvent>(getCombinationBottleList);
@@ -90,62 +88,6 @@ class MasterBloc extends Bloc<MasterEvent, MasterState> {
       emit(GetMonoCartonListSuccess(result));
     } catch (e) {
       emit(GetMonoCartonListFailure(e.toString()));
-    }
-  }
-
-  Future<void> _onFetchBottleSizes(
-    FetchBottleSizes event,
-    Emitter<MasterState> emit,
-  ) async {
-    try {
-      final response = await repository.fetchBottleSizes();
-
-      final sizes = (response as List)
-          .map((e) => BottleSizeModel.fromJson(e))
-          .toList();
-
-      logger.e("Fetched bottle sizes: $sizes");
-
-      emit(BottleSizeLoaded(sizes));
-    } catch (e) {
-      emit(BottleSizeError(e.toString()));
-    }
-  }
-
-  Future<void> _onFetchParties(
-    FetchParties event,
-    Emitter<MasterState> emit,
-  ) async {
-    try {
-      final response = await repository.fetchParties();
-
-      final parties = (response as List)
-          .map((e) => PartyModel.fromJson(e))
-          .toList();
-
-      logger.e("Fetched parties: $parties");
-
-      emit(PartyLoaded(parties));
-    } catch (e) {
-      emit(PartyError(e.toString()));
-    }
-  }
-
-  Future<void> _onFetchBrands(
-    FetchBrands event,
-    Emitter<MasterState> emit,
-  ) async {
-    try {
-      final response = await repository.fetchBrands();
-
-      final brands = (response as List)
-          .map((e) => BrandModel.fromJson(e))
-          .toList();
-
-      logger.e("Fetched brands: $brands");
-      emit(BrandLoaded(brands));
-    } catch (e) {
-      emit(BrandError(e.toString()));
     }
   }
 

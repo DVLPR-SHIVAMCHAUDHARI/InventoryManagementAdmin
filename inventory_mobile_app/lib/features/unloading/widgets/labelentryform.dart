@@ -6,9 +6,12 @@ import 'package:intl/intl.dart';
 
 import 'package:inventory_mobile_app/core/consts/appcolors.dart';
 import 'package:inventory_mobile_app/core/consts/snack_bar.dart';
+import 'package:inventory_mobile_app/features/master/bloc/bottle_size_bloc.dart';
+import 'package:inventory_mobile_app/features/master/bloc/brand_bloc.dart';
 
 import 'package:inventory_mobile_app/features/master/bloc/master_bloc.dart';
 import 'package:inventory_mobile_app/features/master/bloc/master_event.dart';
+import 'package:inventory_mobile_app/features/master/bloc/master_party_bloc.dart';
 import 'package:inventory_mobile_app/features/master/bloc/master_state.dart';
 import 'package:inventory_mobile_app/features/master/master_model/brand_model.dart';
 import 'package:inventory_mobile_app/features/master/master_model/mapping_label_model.dart';
@@ -70,11 +73,6 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
         ),
       );
     });
-    final masterBloc = context.read<MasterBloc>();
-
-    masterBloc.add(FetchParties());
-    masterBloc.add(FetchBrands());
-    masterBloc.add(FetchBottleSizes());
   }
 
   @override
@@ -88,66 +86,79 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) =>
-              MasterBloc()..add(FetchMappingLabelEvent(labelTypeId: 1)),
-        ),
-        BlocProvider(create: (_) => UnloadingBloc(repo: UnloadingRepository())),
-      ],
-      child: Builder(
-        builder: (context) {
-          return BlocListener<MasterBloc, MasterState>(
+    return Builder(
+      builder: (context) {
+        return BlocListener<MasterBloc, MasterState>(
+          listener: (context, state) {
+            if (state is GetMappingLabelListSuccess) {
+              final unique = {
+                for (var item in state.mappingLabels) item.id: item,
+              };
+              setState(() => _mappingList = unique.values.toList());
+            }
+          },
+          child: BlocListener<UnloadingBloc, UnloadingState>(
             listener: (context, state) {
-              if (state is GetMappingLabelListSuccess) {
-                final unique = {
-                  for (var item in state.mappingLabels) item.id: item,
-                };
-                setState(() => _mappingList = unique.values.toList());
+              if (state is LabelEntrySuccess) {
+                snackbar(
+                  context,
+                  color: Colors.green,
+                  message: state.message,
+                  title: "Success",
+                );
+                _refreshList(context);
+                _resetForm();
+              }
+
+              if (state is LabelEntryFailure) {
+                snackbar(context, message: state.error);
               }
             },
-            child: BlocListener<UnloadingBloc, UnloadingState>(
-              listener: (context, state) {
-                if (state is LabelEntrySuccess) {
-                  snackbar(
-                    context,
-                    color: Colors.green,
-                    message: state.message,
-                    title: "Success",
-                  );
-                  _refreshList(context);
-                  _resetForm();
-                }
+            child: Scaffold(
+              backgroundColor: AppColors.background,
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _formCard(),
+                      const SizedBox(height: 12),
+                      _dateFilter(context),
+                      const SizedBox(height: 12),
+                      // 🔍 Search Type
+                      DropdownButtonFormField<LabelSearchType>(
+                        value: selectedSearch,
+                        isExpanded: true,
+                        decoration: _input("Search By"),
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                        items: const [
+                          DropdownMenuItem(
+                            value: LabelSearchType.pallet,
+                            child: Text("Pallet Code"),
+                          ),
+                          DropdownMenuItem(
+                            value: LabelSearchType.vehicle,
+                            child: Text("Vehicle No"),
+                          ),
+                        ],
+                        onChanged: (val) {
+                          setState(() {});
+                          (() => selectedSearch = val!);
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      _topSearchBar(),
 
-                if (state is LabelEntryFailure) {
-                  snackbar(context, message: state.error);
-                }
-              },
-              child: Scaffold(
-                backgroundColor: AppColors.background,
-                body: SafeArea(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        _dateFilter(context),
-                        const SizedBox(height: 12),
-                        _formCard(),
-                        const SizedBox(height: 12),
-                        _topSearchBar(),
-
-                        const SizedBox(height: 16),
-                        _listSection(),
-                      ],
-                    ),
+                      const SizedBox(height: 16),
+                      _listSection(),
+                    ],
                   ),
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -209,12 +220,14 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
       context: context,
       isScrollControlled: true,
       builder: (_) {
-        return BlocProvider.value(
-          value: context.read<MasterBloc>(), // 🔥 FIX
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: context.read<PartyBloc>()),
+            BlocProvider.value(value: context.read<BrandBloc>()),
+            BlocProvider.value(value: context.read<BottleSizeBloc>()),
+          ],
           child: StatefulBuilder(
             builder: (context, setModalState) {
-              final masterState = context.watch<MasterBloc>().state;
-
               return Padding(
                 padding: EdgeInsets.only(
                   left: 16,
@@ -235,78 +248,63 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // 🔍 Search Type
-                      DropdownButtonFormField<LabelSearchType>(
-                        value: selectedSearch,
-                        isExpanded: true,
-                        decoration: _input("Search By"),
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
-                        items: const [
-                          DropdownMenuItem(
-                            value: LabelSearchType.pallet,
-                            child: Text("Pallet Code"),
-                          ),
-                          DropdownMenuItem(
-                            value: LabelSearchType.vehicle,
-                            child: Text("Vehicle No"),
-                          ),
-                        ],
-                        onChanged: (val) {
-                          setModalState(() => selectedSearch = val!);
-                        },
-                      ),
-
                       const SizedBox(height: 12),
 
                       // 🔽 PARTY
-                      AppDropdown<PartyModel>(
-                        title: "Party",
-                        hint: "Select",
-                        items: masterState is PartyLoaded
-                            ? masterState.parties
-                            : [],
-                        value: null,
-                        itemLabel: (item) => item.name!,
-                        onChanged: (val) {
-                          setModalState(() {
-                            selectedPartyId = val?.id;
-                          });
+                      BlocBuilder<PartyBloc, PartyState>(
+                        builder: (context, state) {
+                          return AppDropdown<PartyModel>(
+                            title: "Party",
+                            hint: "Select",
+                            items: state is PartyLoaded ? state.parties : [],
+                            value: null,
+                            itemLabel: (item) => item.name!,
+                            onChanged: (val) {
+                              setModalState(() {
+                                selectedPartyId = val?.id;
+                              });
+                            },
+                          );
                         },
                       ),
 
                       const SizedBox(height: 12),
 
                       // 🔽 BRAND
-                      AppDropdown<BrandModel>(
-                        title: "Brand",
-                        hint: "Select",
-                        items: masterState is BrandLoaded
-                            ? masterState.brands
-                            : [],
-                        value: null,
-                        itemLabel: (item) => item.name!,
-                        onChanged: (val) {
-                          setModalState(() {
-                            selectedBrandId = val?.id;
-                          });
+                      BlocBuilder<BrandBloc, BrandState>(
+                        builder: (context, state) {
+                          return AppDropdown<BrandModel>(
+                            title: "Brand",
+                            hint: "Select",
+                            items: state is BrandLoaded ? state.brands : [],
+                            value: null,
+                            itemLabel: (item) => item.name!,
+                            onChanged: (val) {
+                              setModalState(() {
+                                selectedBrandId = val?.id;
+                              });
+                            },
+                          );
                         },
                       ),
 
                       const SizedBox(height: 12),
 
                       // 🔽 SIZE
-                      AppDropdown(
-                        title: "Bottle Size",
-                        hint: "Select",
-                        items: masterState is BottleSizeLoaded
-                            ? masterState.sizes
-                            : [],
-                        value: null,
-                        itemLabel: (item) => "${item.size} ml",
-                        onChanged: (val) {
-                          setModalState(() {
-                            selectedSizeId = val?.id;
-                          });
+                      BlocBuilder<BottleSizeBloc, BottleSizeState>(
+                        builder: (context, state) {
+                          return AppDropdown(
+                            title: "Bottle Size",
+                            hint: "Select",
+                            items: state is BottleSizeLoaded ? state.sizes : [],
+                            value: null,
+                            itemLabel: (item) => "${item.size} ml",
+                            onChanged: (val) {
+                              setModalState(() {
+                                selectedSizeId = val?.id;
+                              });
+                            },
+                          );
                         },
                       ),
 
@@ -459,6 +457,7 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
         partyNameId: selectedPartyId,
         brandId: selectedBrandId,
         bottleSizeId: selectedSizeId,
+        orderBy: orderBy,
       ),
     );
   }
@@ -647,8 +646,53 @@ class _LabelCreateScreenState extends State<LabelCreateScreen> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: state.list.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) =>
-                _LabelTile(entry: state.list[index], mappingList: _mappingList),
+            itemBuilder: (context, index) {
+              if (state.count == 10) {
+                if (index == state.list.length - 1) {
+                  return Column(
+                    children: [
+                      _LabelTile(
+                        entry: state.list[index],
+                        mappingList: _mappingList,
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        style: ButtonStyle(
+                          overlayColor: MaterialStateProperty.all(
+                            AppColors.primary.withOpacity(0.1),
+                          ),
+                        ),
+                        onPressed: () {
+                          context.read<LabelListBloc>().add(
+                            FetchLabelListEvent(
+                              fromDate: formatDate(fromDate),
+                              toDate: formatDate(toDate),
+                              palletCode: palletSearch,
+                              vehicleNo: vehicleSearch,
+                              partyNameId: selectedPartyId,
+                              brandId: selectedBrandId,
+                              bottleSizeId: selectedSizeId,
+                              orderBy: orderBy,
+                              limit: state.count == 10
+                                  ? state.count + 10
+                                  : null, // load more if count is 10 (means there might be more)
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "Load More ",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              }
+              return _LabelTile(
+                entry: state.list[index],
+                mappingList: _mappingList,
+              );
+            },
           );
         }
 

@@ -11,6 +11,7 @@ import 'package:inventory_mobile_app/features/gate_operations/gate_entries/bloc/
 import 'package:inventory_mobile_app/features/gate_operations/gate_entries/bloc/gate_entry_state.dart';
 
 import 'package:inventory_mobile_app/features/master/bloc/master_bloc.dart';
+import 'package:inventory_mobile_app/features/master/bloc/master_party_bloc.dart';
 import 'package:inventory_mobile_app/features/master/bloc/master_state.dart';
 import 'package:inventory_mobile_app/features/master/master_model/party_model.dart';
 import 'package:inventory_mobile_app/widgets/appdropdown.dart';
@@ -222,8 +223,8 @@ class _NewGateEntryPageState extends State<NewGateEntryPage> {
     );
   }
 
-  BlocBuilder<MasterBloc, MasterState> partydropdown() {
-    return BlocBuilder<MasterBloc, MasterState>(
+  BlocBuilder<PartyBloc, PartyState> partydropdown() {
+    return BlocBuilder<PartyBloc, PartyState>(
       builder: (context, state) {
         if (state is PartyLoading) {
           return const AppDropdownShimmer(title: "Party");

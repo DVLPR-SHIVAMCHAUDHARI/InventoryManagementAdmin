@@ -328,7 +328,7 @@ class UnloadingRepository extends Repository {
     }
   }
 
-  Future<List<LabelUnloadingModel>> fetchLabelUnloadingList({
+  Future fetchLabelUnloadingList({
     required String fromDate,
     required String toDate,
     String? palletCode,
@@ -337,9 +337,9 @@ class UnloadingRepository extends Repository {
     int? brandName,
     int? bottleSize,
     String? sortBy,
-    String orderBy = "asc",
+    String? orderBy = "asc",
     int offset = 1,
-    int limit = 10,
+    int? limit = 10,
   }) async {
     try {
       final response = await dio.get(
@@ -373,7 +373,10 @@ class UnloadingRepository extends Repository {
 
       final List list = data["list"];
 
-      return list.map((e) => LabelUnloadingModel.fromJson(e)).toList();
+      return {
+        "count": data["count"],
+        "list": list.map((e) => LabelUnloadingModel.fromJson(e)).toList(),
+      };
     } catch (e) {
       throw ("Error fetching label unloading list: $e");
     }

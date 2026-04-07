@@ -18,6 +18,8 @@ class FetchLabelListEvent extends LabelListEvent {
   final int? partyNameId;
   final int? brandId;
   final int? bottleSizeId;
+  final String? orderBy;
+  final int? limit;
 
   FetchLabelListEvent({
     required this.fromDate,
@@ -27,6 +29,8 @@ class FetchLabelListEvent extends LabelListEvent {
     this.partyNameId,
     this.brandId,
     this.bottleSizeId,
+    this.orderBy,
+    this.limit,
   });
 }
 
@@ -42,8 +46,9 @@ class LabelListLoading extends LabelListState {}
 
 class LabelListSuccess extends LabelListState {
   final List<LabelUnloadingModel> list;
+  final int count;
 
-  LabelListSuccess(this.list);
+  LabelListSuccess({required this.list, required this.count});
 }
 
 class LabelListFailure extends LabelListState {
@@ -70,13 +75,11 @@ class LabelListBloc extends Bloc<LabelListEvent, LabelListState> {
           partyName: event.partyNameId,
           brandName: event.brandId,
           bottleSize: event.bottleSizeId,
+          orderBy: event.orderBy,
+          limit: event.limit,
         );
-        print(
-          "EVENT → ${event.palletCode}, ${event.vehicleNo}, ${event.partyNameId}",
-        );
-        print("RESULT LENGTH → ${list.length}");
 
-        emit(LabelListSuccess(List.from(list))); // 👈 important
+        emit(LabelListSuccess(list: list["list"], count: list["count"]));
       } catch (e) {
         emit(LabelListFailure(e.toString()));
       }

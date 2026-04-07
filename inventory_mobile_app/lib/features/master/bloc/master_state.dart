@@ -129,67 +129,6 @@ class GetMonoCartonListFailure extends MasterState {
   List<Object?> get props => [error];
 }
 
-class PartyInitial extends MasterState {
-  PartyInitial();
-}
-
-class PartyLoading extends MasterState {
-  PartyLoading();
-}
-
-class PartyLoaded extends MasterState {
-  final List<PartyModel> parties;
-
-  PartyLoaded(this.parties);
-
-  @override
-  List<Object?> get props => [parties];
-}
-
-class PartyError extends MasterState {
-  final String message;
-
-  PartyError(this.message);
-
-  @override
-  List<Object?> get props => [message];
-}
-
-class BrandLoading extends MasterState {
-  BrandLoading();
-}
-
-class BrandLoaded extends MasterState {
-  final List<BrandModel> brands;
-
-  BrandLoaded(this.brands);
-
-  @override
-  List<Object?> get props => [brands];
-}
-
-class BrandError extends MasterState {
-  final String message;
-
-  BrandError(this.message);
-
-  @override
-  List<Object?> get props => [message];
-}
-
-class BottleSizeLoading extends MasterState {}
-
-class BottleSizeLoaded extends MasterState {
-  final List<BottleSizeModel> sizes;
-
-  BottleSizeLoaded(this.sizes);
-}
-
-class BottleSizeError extends MasterState {
-  final String error;
-
-  BottleSizeError(this.error);
-}
 ////////////////////////////////////////////////////////////
 /// MAPPING BOTTLE LIST
 ////////////////////////////////////////////////////////////

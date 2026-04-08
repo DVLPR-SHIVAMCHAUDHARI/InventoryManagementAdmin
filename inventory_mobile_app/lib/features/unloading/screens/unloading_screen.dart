@@ -165,7 +165,7 @@ class _UnloadingPageState extends State<UnloadingPage> {
                                 FetchLabelListEvent(
                                   fromDate: DateFormat(
                                     'yyyy-MM-dd',
-                                  ).format(yesterday),
+                                  ).format(now.subtract(Duration(days: 30))),
                                   toDate: DateFormat('yyyy-MM-dd').format(now),
                                 ),
                               );
